@@ -1,0 +1,17 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides: directadmin
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start and stop directadmin
+# Description: DirectAdmin
+### END INIT INFO
+
+#sudo python /home/pi/rpisigfox/bouclesigfox.py
+#sudo python /home/pi/rpisigfox/sendsigfox.py 3117AE131D1E1E
+
+exit 0
