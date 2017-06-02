@@ -16,9 +16,9 @@ import sys
 gpsd = None #seting the global variable
 
 #pour activer le module de temperature
-os.system('modprobe w1-gpio')
-os.system('modprobe w1-therm')
-base_dir = '/sys/bus/w1/devices/'
+#os.system('modprobe w1-gpio')
+#os.system('modprobe w1-therm')
+#base_dir = '/sys/bus/w1/devices/'
 #device_folder = glob.glob(base_dir + '28*')[0]
 #device_file = device_folder + '/w1_slave'
 
@@ -75,6 +75,7 @@ if __name__ == '__main__':
       print 'longitude   ' , gpsd.fix.longitude
       gpsLong = gpsd.fix.longitude
       print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
+      os.system('sudo raspistill -o sondetest'+gpsd.utc+'.jpg -w 640 -h 480')
       print 'altitude (m)' , gpsd.fix.altitude
       gpsAlt = gpsd.fix.altitude
       print 'eps         ' , gpsd.fix.eps
