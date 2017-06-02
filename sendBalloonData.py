@@ -8,8 +8,37 @@ from time import *
 import time
 import threading
 import subprocess
+import os
+import glob
+import time
+import sys
 
 gpsd = None #seting the global variable
+
+#pour activer le module de temperature
+os.system('modprobe w1-gpio')
+os.system('modprobe w1-therm')
+base_dir = '/sys/bus/w1/devices/'
+#device_folder = glob.glob(base_dir + '28*')[0]
+#device_file = device_folder + '/w1_slave'
+
+def read_temp_raw():
+ f = open(device_file, 'r')
+ lines = f.readlines()
+ f.close()
+ return lines
+ 
+def read_temp():
+ lines = read_temp_raw()
+ while lines[0].strip()[-3:] != 'YES':
+  time.sleep(0.2)
+ lines = read_temp_raw()
+ equals_pos = lines[1].find('t=')
+ if equals_pos != -1:
+  temp_string = lines[1][equals_pos+2:]
+  temp_c = float(temp_string) / 1000.0
+  temp_f = temp_c * 9.0 / 5.0 + 32.0
+ return temp_c, temp_f
 
 os.system('clear') #clear the terminal (optional)
 
@@ -31,9 +60,12 @@ if __name__ == '__main__':
   try:
     gpsp.start() # start it up
     while True:
+#      print(read_temp()[0])
+#      time.sleep(0.3)
       #It may take a second or two to get good data
       #print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
-      cmdSigfox = 'sudo python /home/pi/rpisigfox/sendsigfox.py '
+      cmdSigfox   = 'sudo python /home/pi/rpisigfox/sendsigfox.py '
+      temp = 0
       os.system('clear')
       print
       print ' GPS reading'
@@ -55,13 +87,29 @@ if __name__ == '__main__':
       print 'mode        ' , gpsd.fix.mode
       print
       print 'sats        ' , gpsd.satellites
-      print 'hex         ' , str(gpsLat).split('.',1)[0]
-      #construction de la trame pour la longitude
-      cmdSigfox = cmdSigfox + str(gpsLong).split('.',1)[0] + ' ' + str(gpsLong).split('.',1)[1][:4]
-      #construction de la trame pour la latitude
-      cmdSigfox = cmdSigfox +' '+ str(gpsLat).split('.',1)[0] + ' ' + str(gpsLat).split('.',1)[1][:4]
-      #construction de la trame pour l'altitude
-      cmdSigfox = cmdSigfox +' '+ str(gpsAlt).split('.',1)[0]
+      print 'temp        ' , temp
+      #construction de la trame pour la longitude avec decalage pour ne pas avoir a traiter une longitude negative
+      if str(gpsLong) in 'nan':
+         cmdSigfox = cmdSigfox + '000000'
+      else :
+         cmdSigfox = cmdSigfox + str(hex(int(str(gpsLong).split('.',1)[0])+5))[2:] + ' ' + str(hex(int(str(gpsLong).split('.',1)[1][:4])+1000))[2:] + ' '
+
+      # construction de la trame pour la latitude
+      if str(gpsLat) in 'nan':      
+          cmdSigfox = cmdSigfox + '000000'
+      else :
+          cmdSigfox = cmdSigfox + str(hex(int(str(gpsLat).split('.',1)[0])))[2:] + ' '  + str(hex(int(str(gpsLat).split('.',1)[1][:4])+1000))[2:] + ' '
+      
+      # construction de la trame pour l'altitude
+      if str(gpsAlt) in 'nan':
+         cmdSigfox = cmdSigfox + '00'
+      else :
+         cmdSigfox = cmdSigfox + str(hex(int(str(gpsAlt).split('.',1)[0])))[2:] + ' '
+      # construction de la trame pour la temperature
+      if str(temp) in 'nan':
+         cmdSigfox = cmdSigfox + '00' 
+      else :
+         cmdSigfox = cmdSigfox + '00'
 
       print cmdSigfox
       #os.system(cmdSigfox)
@@ -71,4 +119,4 @@ if __name__ == '__main__':
     print "\nKilling Thread..."
     gpsp.running = False
     gpsp.join() # wait for the thread to finish what it's doing
-  print "Done.\nExiting."
+    print "Done.\nExiting."
