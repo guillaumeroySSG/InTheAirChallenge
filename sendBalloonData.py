@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
       print cmdSigfox
       os.system(cmdSigfox)
-      time.sleep(5) #set to whatever
+      time.sleep(300) #set to whatever
 
   except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
     print "\nKilling Thread..."
