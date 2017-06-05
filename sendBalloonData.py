@@ -40,6 +40,18 @@ def read_temp():
   temp_f = temp_c * 9.0 / 5.0 + 32.0
  return temp_c, temp_f
 
+def format_hex(value):
+   print value
+   # on enleve les 0x
+   strRes = str(value)[2:]
+   # on complete avec des 0 pour avoir 1 hexa sur 4 bit
+   i = 0
+   longueurChaine = len(strRes)
+   while i < (4 - longueurChaine):
+    strRes = '0' + strRes
+    i=i+1
+   return strRes
+
 os.system('clear') #clear the terminal (optional)
 
 class GpsPoller(threading.Thread):
@@ -75,7 +87,7 @@ if __name__ == '__main__':
       print 'longitude   ' , gpsd.fix.longitude
       gpsLong = gpsd.fix.longitude
       print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
-      os.system('sudo raspistill -o sondetest'+gpsd.utc+'.jpg -w 640 -h 480')
+      os.system('sudo raspistill -o img_sonde_'+gpsd.utc+'.jpg -w 640 -h 480')
       print 'altitude (m)' , gpsd.fix.altitude
       gpsAlt = gpsd.fix.altitude
       print 'eps         ' , gpsd.fix.eps
@@ -89,31 +101,32 @@ if __name__ == '__main__':
       print
       print 'sats        ' , gpsd.satellites
       print 'temp        ' , temp
+
       #construction de la trame pour la longitude avec decalage pour ne pas avoir a traiter une longitude negative
       if str(gpsLong) in 'nan':
          cmdSigfox = cmdSigfox + '000000'
       else :
-         cmdSigfox = cmdSigfox + str(hex(int(str(gpsLong).split('.',1)[0])+5))[2:] + ' ' + str(hex(int(str(gpsLong).split('.',1)[1][:4])+1000))[2:] + ' '
+         cmdSigfox = cmdSigfox + format_hex(hex(int(str(gpsLong).split('.',1)[0])+5)) + format_hex(hex(int(str(gpsLong).split('.',1)[1][:4])))
 
       # construction de la trame pour la latitude
       if str(gpsLat) in 'nan':      
           cmdSigfox = cmdSigfox + '000000'
       else :
-          cmdSigfox = cmdSigfox + str(hex(int(str(gpsLat).split('.',1)[0])))[2:] + ' '  + str(hex(int(str(gpsLat).split('.',1)[1][:4])+1000))[2:] + ' '
+          cmdSigfox = cmdSigfox + format_hex(hex(int(str(gpsLat).split('.',1)[0]))) + format_hex(hex(int(str(gpsLat).split('.',1)[1][:4])))
       
       # construction de la trame pour l'altitude
       if str(gpsAlt) in 'nan':
          cmdSigfox = cmdSigfox + '00'
       else :
-         cmdSigfox = cmdSigfox + str(hex(int(str(gpsAlt).split('.',1)[0])))[2:] + ' '
-      # construction de la trame pour la temperature
+         cmdSigfox = cmdSigfox + format_hex(hex(int(str(gpsAlt).split('.',1)[0])))
+      # construction de la trame pour la temperature. Ajout de 50 pour ne pas gerer les temperature negative
       if str(temp) in 'nan':
-         cmdSigfox = cmdSigfox + '00' 
-      else :
          cmdSigfox = cmdSigfox + '00'
+      else :
+         cmdSigfox = cmdSigfox + format_hex(hex(int(str(temp+50).split('.',1)[0])))
 
       print cmdSigfox
-      #os.system(cmdSigfox)
+      os.system(cmdSigfox)
       time.sleep(5) #set to whatever
 
   except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
