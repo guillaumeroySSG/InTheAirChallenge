@@ -11,7 +11,6 @@
 # Description: DirectAdmin
 ### END INIT INFO
 
-#sudo python /home/pi/rpisigfox/bouclesigfox.py
-#sudo python /home/pi/rpisigfox/sendsigfox.py 3117AE131D1E1E
+sudo python /home/pi/InTheAirChallenge/sendBalloonData.py
 
 exit 0
