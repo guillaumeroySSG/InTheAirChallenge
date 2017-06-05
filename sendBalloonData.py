@@ -41,7 +41,6 @@ def read_temp():
  return temp_c, temp_f
 
 def format_hex(value):
-   print value
    # on enleve les 0x
    strRes = str(value)[2:]
    # on complete avec des 0 pour avoir 1 hexa sur 4 bit
@@ -87,7 +86,7 @@ if __name__ == '__main__':
       print 'longitude   ' , gpsd.fix.longitude
       gpsLong = gpsd.fix.longitude
       print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
-      os.system('sudo raspistill -o img_sonde_'+gpsd.utc+'.jpg -w 640 -h 480')
+      os.system('sudo raspistill -o /home/pi/InTheAirChallenge/img_sonde_'+time.strftime("%H:%M:%S")+'.jpg -w 640 -h 480')
       print 'altitude (m)' , gpsd.fix.altitude
       gpsAlt = gpsd.fix.altitude
       print 'eps         ' , gpsd.fix.eps
@@ -98,7 +97,6 @@ if __name__ == '__main__':
       print 'climb       ' , gpsd.fix.climb
       print 'track       ' , gpsd.fix.track
       print 'mode        ' , gpsd.fix.mode
-      print
       print 'sats        ' , gpsd.satellites
       print 'temp        ' , temp
 
@@ -127,7 +125,7 @@ if __name__ == '__main__':
 
       print cmdSigfox
       os.system(cmdSigfox)
-      time.sleep(300) #set to whatever
+      time.sleep(5) #set to whatever
 
   except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
     print "\nKilling Thread..."
