@@ -11,6 +11,9 @@
 # Description: DirectAdmin
 ### END INIT INFO
 
+gpio mode 21 out
+gpio write 21 1
+sleep 5
 sudo python /home/pi/InTheAirChallenge/sendBalloonData.py
 
 exit 0
