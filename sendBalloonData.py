@@ -14,11 +14,11 @@ import time
 import sys
 import RPi.GPIO as GPIO
 
-gpsd = None #seting the global variable
+gpsd = None #setting the global variable
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(21, GPIO.OUT, initial=GPIO.HIGH)
-
+time.sleep(3)
 #pour activer le module de temperature
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -87,7 +87,7 @@ if __name__ == '__main__':
       print 'longitude   ' , gpsd.fix.longitude
       gpsLong = gpsd.fix.longitude
       print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
-      os.system('sudo raspistill -o /home/pi/InTheAirChallenge/img_sonde_'+time.strftime("%H:%M:%S")+'.jpg -w 640 -h 480')
+      os.system('sudo raspistill -o /home/pi/InTheAirChallenge/img_sonde_'+time.strftime("%H:%M:%S")+'.jpg -w 1024 -h 768')
       print 'altitude (m)' , gpsd.fix.altitude
       gpsAlt = gpsd.fix.altitude
       print 'eps         ' , gpsd.fix.eps
