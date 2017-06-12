@@ -12,15 +12,19 @@ import os
 import glob
 import time
 import sys
+import RPi.GPIO as GPIO
 
 gpsd = None #seting the global variable
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(21, GPIO.OUT, initial=GPIO.HIGH)
+
 #pour activer le module de temperature
-#os.system('modprobe w1-gpio')
-#os.system('modprobe w1-therm')
-#base_dir = '/sys/bus/w1/devices/'
-#device_folder = glob.glob(base_dir + '28*')[0]
-#device_file = device_folder + '/w1_slave'
+os.system('modprobe w1-gpio')
+os.system('modprobe w1-therm')
+base_dir = '/sys/bus/w1/devices/'
+device_folder = glob.glob(base_dir + '28*')[0]
+device_file = device_folder + '/w1_slave'
 
 def read_temp_raw():
  f = open(device_file, 'r')
@@ -71,12 +75,9 @@ if __name__ == '__main__':
   try:
     gpsp.start() # start it up
     while True:
-#      print(read_temp()[0])
-#      time.sleep(0.3)
       #It may take a second or two to get good data
       #print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
       cmdSigfox   = 'sudo python /home/pi/rpisigfox/sendsigfox.py '
-      temp = 0
       os.system('clear')
       print
       print ' GPS reading'
@@ -98,7 +99,7 @@ if __name__ == '__main__':
       print 'track       ' , gpsd.fix.track
       print 'mode        ' , gpsd.fix.mode
       print 'sats        ' , gpsd.satellites
-      print 'temp        ' , temp
+      print 'temp        ' , read_temp()[0]
 
       #construction de la trame pour la longitude avec decalage pour ne pas avoir a traiter une longitude negative
       if str(gpsLong) in 'nan':
@@ -118,10 +119,10 @@ if __name__ == '__main__':
       else :
          cmdSigfox = cmdSigfox + format_hex(hex(int(str(gpsAlt).split('.',1)[0])))
       # construction de la trame pour la temperature. Ajout de 50 pour ne pas gerer les temperature negative
-      if str(temp) in 'nan':
+      if str(read_temp()[0]) in 'nan':
          cmdSigfox = cmdSigfox + '00'
       else :
-         cmdSigfox = cmdSigfox + format_hex(hex(int(str(temp+50).split('.',1)[0])))
+         cmdSigfox = cmdSigfox + format_hex(hex(int(str(read_temp()[0]+50).split('.',1)[0])))
 
       print cmdSigfox
       os.system(cmdSigfox)
